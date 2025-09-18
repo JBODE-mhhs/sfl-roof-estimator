@@ -1,9 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { quotePricingSchema } from '@/lib/validation';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
-import { PricingCalculationService } from '@/lib/calculations/pricing';
-import { FinanceCalculationService } from '@/lib/calculations/finance';
+
+// Lazy load these to prevent build-time database connections
+let PricingCalculationService: any;
+let FinanceCalculationService: any;
+let prisma: any;
+
+async function getServices() {
+  if (!PricingCalculationService) {
+    const { PricingCalculationService: PCS } = await import('@/lib/calculations/pricing');
+    const { FinanceCalculationService: FCS } = await import('@/lib/calculations/finance');
+    const { prisma: p } = await import('@/lib/db');
+    PricingCalculationService = PCS;
+    FinanceCalculationService = FCS;
+    prisma = p;
+  }
+  return { PricingCalculationService, FinanceCalculationService, prisma };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,8 +42,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { quoteId, sections } = quotePricingSchema.parse(body);
 
-    const pricingService = new PricingCalculationService(prisma);
-    const financeService = new FinanceCalculationService(prisma);
+    const { PricingCalculationService: PCS, FinanceCalculationService: FCS, prisma: p } = await getServices();
+    
+    const pricingService = new PCS(p);
+    const financeService = new FCS(p);
 
     // Calculate pricing for each section
     const sectionsWithIds = sections.map((section, index) => ({
@@ -56,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({
-      lineItems: pricingResult.breakdown.map(item => ({
+      lineItems: pricingResult.breakdown.map((item: any) => ({
         description: item.description,
         amount: item.amount,
         amountFormatted: `$${item.amount.toLocaleString()}`,
@@ -72,18 +88,18 @@ export async function POST(request: NextRequest) {
           financingOptions.overallRange.monthlyMax
         )
       },
-      sections: pricingResult.sections.map(section => ({
+      sections: pricingResult.sections.map((section: any) => ({
         sectionId: section.sectionId,
         totalPrice: section.totalPrice,
         totalPriceFormatted: `$${section.totalPrice.toLocaleString()}`,
-        breakdown: section.breakdown.map(item => ({
+        breakdown: section.breakdown.map((item: any) => ({
           description: item.description,
           amount: item.amount,
           amountFormatted: `$${item.amount.toLocaleString()}`,
           isMultiplier: item.isMultiplier
         }))
       })),
-      financingOptions: financingOptions.options.map(option => ({
+      financingOptions: financingOptions.options.map((option: any) => ({
         name: option.name,
         monthlyRange: financeService.formatPaymentRange(
           option.monthlyPaymentMin,

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { createQuoteSchema } from '@/lib/validation';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
+
+// Lazy load prisma to prevent build-time database connections
+async function getPrisma() {
+  const { prisma } = await import('@/lib/db');
+  return prisma;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +31,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = createQuoteSchema.parse(body);
 
+    const prisma = await getPrisma();
+    
     // Create the quote
     const quote = await prisma.quote.create({
       data: {

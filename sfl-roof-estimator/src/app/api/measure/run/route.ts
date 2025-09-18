@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MeasurementService } from '@/lib/measurement/measurement-service';
-import { prisma } from '@/lib/db';
 import { measurementSchema } from '@/lib/validation';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
+
+// Lazy load these to prevent build-time database connections
+let MeasurementService: any;
+let prisma: any;
+
+async function getMeasurementService() {
+  if (!MeasurementService) {
+    const { MeasurementService: MS } = await import('@/lib/measurement/measurement-service');
+    const { prisma: p } = await import('@/lib/db');
+    MeasurementService = MS;
+    prisma = p;
+  }
+  return { MeasurementService, prisma };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,13 +39,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const input = measurementSchema.parse(body);
 
-    const measurementService = new MeasurementService(prisma);
+    const { MeasurementService: MS, prisma: p } = await getMeasurementService();
+    const measurementService = new MS(p);
     const result = await measurementService.getRoofMeasurements(input);
 
     // Remove waste percentage information from client response
     const sanitizedMeasurement = {
       ...result.measurement,
-      sections: result.measurement.sections.map(section => ({
+      sections: result.measurement.sections.map((section: any) => ({
         kind: section.kind,
         planAreaSqFt: section.planAreaSqFt,
         pitchRisePer12: section.pitchRisePer12,

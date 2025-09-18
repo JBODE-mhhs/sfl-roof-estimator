@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
 import { updateQuoteSelectionsSchema } from '@/lib/validation';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
-import { WasteCalculationService } from '@/lib/calculations/waste';
-import { PricingCalculationService } from '@/lib/calculations/pricing';
-import { FinanceCalculationService } from '@/lib/calculations/finance';
 import { calculateSlopedArea, getPitchTier } from '@/lib/calculations/pitch';
+
+// Lazy load these to prevent build-time database connections
+let WasteCalculationService: any;
+let PricingCalculationService: any;
+let FinanceCalculationService: any;
+let prisma: any;
+
+async function getServices() {
+  if (!WasteCalculationService) {
+    const { WasteCalculationService: WCS } = await import('@/lib/calculations/waste');
+    const { PricingCalculationService: PCS } = await import('@/lib/calculations/pricing');
+    const { FinanceCalculationService: FCS } = await import('@/lib/calculations/finance');
+    const { prisma: p } = await import('@/lib/db');
+    WasteCalculationService = WCS;
+    PricingCalculationService = PCS;
+    FinanceCalculationService = FCS;
+    prisma = p;
+  }
+  return { WasteCalculationService, PricingCalculationService, FinanceCalculationService, prisma };
+}
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -30,8 +46,10 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { quoteId, sections, storyCount, tearOffLayers } = updateQuoteSelectionsSchema.parse(body);
 
+    const { WasteCalculationService: WCS, PricingCalculationService: PCS, FinanceCalculationService: FCS, prisma: p } = await getServices();
+    
     // Get existing quote and sections
-    const quote = await prisma.quote.findUnique({
+    const quote = await p.quote.findUnique({
       where: { id: quoteId },
       include: {
         sections: true,
@@ -47,9 +65,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Initialize calculation services
-    const wasteService = new WasteCalculationService(prisma);
-    const pricingService = new PricingCalculationService(prisma);
-    const financeService = new FinanceCalculationService(prisma);
+    const wasteService = new WCS(p);
+    const pricingService = new PCS(p);
+    const financeService = new FCS(p);
 
     // Update sections with new selections and recalculate
     const updatedSections = [];
@@ -144,7 +162,7 @@ export async function PATCH(request: NextRequest) {
           priceFormatted: section.priceCents ? `$${(section.priceCents / 100).toLocaleString()}` : '$0'
         }))
       },
-      financingOptions: financingOptions.options.map(option => ({
+      financingOptions: financingOptions.options.map((option: any) => ({
         name: option.name,
         monthlyRange: financeService.formatPaymentRange(
           option.monthlyPaymentMin,
