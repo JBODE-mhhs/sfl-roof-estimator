@@ -59,32 +59,48 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
         return
       }
 
-      // If no Google Maps API, use mock suggestions
+      // Check if Google Maps API is available
       if (!autocompleteService.current) {
-        console.log('Google Places API not available, using mock suggestions')
-        const mockSuggestions = [
-          {
-            placeId: 'mock-1',
-            description: `${searchQuery}, Miami, FL, USA`,
-            structuredFormatting: {
-              mainText: searchQuery,
-              secondaryText: 'Miami, FL, USA'
-            }
-          },
-          {
-            placeId: 'mock-2', 
-            description: `${searchQuery}, Fort Lauderdale, FL, USA`,
-            structuredFormatting: {
-              mainText: searchQuery,
-              secondaryText: 'Fort Lauderdale, FL, USA'
-            }
-          }
-        ]
-        setTimeout(() => {
+        console.log('Google Places API not available, checking API key...')
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+        console.log('API Key available:', !!apiKey)
+        
+        if (!apiKey) {
+          console.error('Google Maps API key not found in environment')
+          setError('Address search temporarily unavailable. Please try again later.')
           setIsLoading(false)
-          setSuggestions(mockSuggestions)
-        }, 500)
-        return
+          return
+        }
+        
+        // Try to initialize the service again
+        if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+          autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
+        } else {
+          console.log('Google Places API still not available, using mock suggestions')
+          const mockSuggestions = [
+            {
+              placeId: 'mock-1',
+              description: `${searchQuery}, Miami, FL, USA`,
+              structuredFormatting: {
+                mainText: searchQuery,
+                secondaryText: 'Miami, FL, USA'
+              }
+            },
+            {
+              placeId: 'mock-2', 
+              description: `${searchQuery}, Fort Lauderdale, FL, USA`,
+              structuredFormatting: {
+                mainText: searchQuery,
+                secondaryText: 'Fort Lauderdale, FL, USA'
+              }
+            }
+          ]
+          setTimeout(() => {
+            setIsLoading(false)
+            setSuggestions(mockSuggestions)
+          }, 500)
+          return
+        }
       }
 
       setIsLoading(true)

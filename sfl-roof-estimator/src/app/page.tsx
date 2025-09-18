@@ -33,9 +33,11 @@ export default function HomePage() {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     console.log('Google Maps API Key available:', !!apiKey)
     console.log('API Key (first 10 chars):', apiKey?.substring(0, 10))
+    console.log('Environment:', process.env.NODE_ENV)
     
     if (!apiKey) {
       console.error('Google Maps API key not found!')
+      console.error('Make sure NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is set in Vercel environment variables')
       return
     }
 
@@ -47,9 +49,12 @@ export default function HomePage() {
 
     loader.load().then(() => {
       console.log('Google Maps API loaded successfully')
+      console.log('Google Maps object:', !!(window as any).google)
+      console.log('Places API available:', !!(window as any).google?.maps?.places)
       setIsGoogleMapsLoaded(true)
     }).catch((error) => {
       console.error('Failed to load Google Maps:', error)
+      console.error('Error details:', error.message)
     })
   }, [])
 
