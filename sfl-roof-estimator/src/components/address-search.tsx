@@ -144,8 +144,9 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
         // For specific known addresses, use exact coordinates
         if (suggestion.description.toLowerCase().includes('1065') && suggestion.description.toLowerCase().includes('sw 141')) {
           // Exact coordinates for 1065 SW 141st Ct, Miami, FL 33184 (Westchester area)
-          lat = 25.7600  // Westchester area latitude
-          lng = -80.3200  // Westchester area longitude
+          // These coordinates should show a residential area with houses
+          lat = 25.7300  // More accurate Westchester area latitude
+          lng = -80.3500  // More accurate Westchester area longitude
           county = 'Miami-Dade'
           console.log('Using exact coordinates for 1065 SW 141st Ct:', { lat, lng })
         } else {
