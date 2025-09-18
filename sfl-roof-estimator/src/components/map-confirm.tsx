@@ -12,6 +12,7 @@ interface MapConfirmProps {
   streetViewUrl?: string
   onConfirm: () => void
   onCancel: () => void
+  onLocationChange?: (lat: number, lng: number) => void
   disabled?: boolean
 }
 
@@ -22,6 +23,7 @@ export function MapConfirm({
   streetViewUrl,
   onConfirm,
   onCancel,
+  onLocationChange,
   disabled = false
 }: MapConfirmProps) {
   const mapRef = useRef<HTMLDivElement>(null)
@@ -44,11 +46,12 @@ export function MapConfirm({
       fullscreenControl: false
     })
 
-    // Add marker
-    new (window as any).google.maps.Marker({
+    // Add draggable marker
+    const marker = new (window as any).google.maps.Marker({
       position: { lat, lng },
       map,
       title: address,
+      draggable: true,
       icon: {
         path: (window as any).google.maps.SymbolPath.CIRCLE,
         scale: 10,
@@ -56,6 +59,19 @@ export function MapConfirm({
         fillOpacity: 1,
         strokeWeight: 2,
         strokeColor: '#ffffff'
+      }
+    })
+
+    // Listen for marker drag events
+    marker.addListener('dragend', () => {
+      const newPosition = marker.getPosition()
+      const newLat = newPosition.lat()
+      const newLng = newPosition.lng()
+      
+      console.log('Marker moved to:', { lat: newLat, lng: newLng })
+      
+      if (onLocationChange) {
+        onLocationChange(newLat, newLng)
       }
     })
 
@@ -118,6 +134,9 @@ export function MapConfirm({
                 />
                 <p className="text-sm text-muted-foreground mt-2">
                   <strong>{address}</strong>
+                </p>
+                <p className="text-xs text-blue-600 mt-1">
+                  💡 Drag the blue marker to adjust the exact location if needed
                 </p>
               </div>
             </div>

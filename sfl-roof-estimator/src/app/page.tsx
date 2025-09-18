@@ -109,6 +109,17 @@ export default function HomePage() {
     setCurrentStep('search')
   }
 
+  const handleLocationChange = (newLat: number, newLng: number) => {
+    if (addressData) {
+      setAddressData({
+        ...addressData,
+        lat: newLat,
+        lng: newLng
+      })
+      console.log('Location updated:', { lat: newLat, lng: newLng })
+    }
+  }
+
   if (!isGoogleMapsLoaded && currentStep !== 'search') {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -209,6 +220,7 @@ export default function HomePage() {
             streetViewUrl={addressData.streetViewUrl}
             onConfirm={handleConfirmAddress}
             onCancel={handleBackToSearch}
+            onLocationChange={handleLocationChange}
           />
         )}
 
