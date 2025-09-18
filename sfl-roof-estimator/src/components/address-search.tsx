@@ -147,7 +147,7 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
           lat = 25.757474938704163  // Exact latitude from user
           lng = -80.42398408072694  // Exact longitude from user
           county = 'Miami-Dade'
-          console.log('Using exact coordinates for 1065 SW 141st Ct:', { lat, lng })
+          console.log('Using EXACT coordinates for 1065 SW 141st Ct:', { lat, lng })
         } else {
           // Try to geocode other addresses
           try {
