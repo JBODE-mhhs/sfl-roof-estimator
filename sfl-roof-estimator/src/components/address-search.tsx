@@ -134,13 +134,28 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
     try {
       // Mock data for testing when API is not available
       if (suggestion.placeId.startsWith('mock-')) {
+        // Use more realistic coordinates based on the address
+        let lat, lng, county
+        if (suggestion.description.includes('Miami')) {
+          lat = 25.7617 + (Math.random() - 0.5) * 0.05 // Miami area
+          lng = -80.1918 + (Math.random() - 0.5) * 0.05
+          county = 'Miami-Dade'
+        } else if (suggestion.description.includes('Fort Lauderdale')) {
+          lat = 26.1224 + (Math.random() - 0.5) * 0.05 // Fort Lauderdale area
+          lng = -80.1373 + (Math.random() - 0.5) * 0.05
+          county = 'Broward'
+        } else {
+          lat = 26.7153 + (Math.random() - 0.5) * 0.05 // West Palm Beach area
+          lng = -80.0534 + (Math.random() - 0.5) * 0.05
+          county = 'Palm Beach'
+        }
+
         const mockData = {
           placeId: suggestion.placeId,
           formattedAddress: suggestion.description,
-          lat: 25.7617 + (Math.random() - 0.5) * 0.1, // Miami area
-          lng: -80.1918 + (Math.random() - 0.5) * 0.1,
-          county: suggestion.description.includes('Miami') ? 'Miami-Dade' : 
-                  suggestion.description.includes('Fort Lauderdale') ? 'Broward' : 'Palm Beach',
+          lat: lat,
+          lng: lng,
+          county: county,
           streetViewUrl: undefined
         }
         
