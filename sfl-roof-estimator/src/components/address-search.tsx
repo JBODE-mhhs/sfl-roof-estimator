@@ -44,8 +44,35 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
 
   const getSuggestions = useCallback(
     debounce(async (searchQuery: string) => {
-      if (!searchQuery.trim() || !autocompleteService.current) {
+      if (!searchQuery.trim()) {
         setSuggestions([])
+        return
+      }
+
+      // If no Google Maps API, use mock suggestions
+      if (!autocompleteService.current) {
+        const mockSuggestions = [
+          {
+            placeId: 'mock-1',
+            description: `${searchQuery}, Miami, FL, USA`,
+            structuredFormatting: {
+              mainText: searchQuery,
+              secondaryText: 'Miami, FL, USA'
+            }
+          },
+          {
+            placeId: 'mock-2', 
+            description: `${searchQuery}, Fort Lauderdale, FL, USA`,
+            structuredFormatting: {
+              mainText: searchQuery,
+              secondaryText: 'Fort Lauderdale, FL, USA'
+            }
+          }
+        ]
+        setTimeout(() => {
+          setIsLoading(false)
+          setSuggestions(mockSuggestions)
+        }, 500)
         return
       }
 
@@ -104,6 +131,26 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
     setSuggestions([])
 
     try {
+      // Mock data for testing when API is not available
+      if (suggestion.placeId.startsWith('mock-')) {
+        const mockData = {
+          placeId: suggestion.placeId,
+          formattedAddress: suggestion.description,
+          lat: 25.7617 + (Math.random() - 0.5) * 0.1, // Miami area
+          lng: -80.1918 + (Math.random() - 0.5) * 0.1,
+          county: suggestion.description.includes('Miami') ? 'Miami-Dade' : 
+                  suggestion.description.includes('Fort Lauderdale') ? 'Broward' : 'Palm Beach',
+          streetViewUrl: undefined
+        }
+        
+        setTimeout(() => {
+          setQuery(suggestion.structuredFormatting.mainText)
+          onAddressSelect(mockData)
+          setIsResolving(false)
+        }, 1000)
+        return
+      }
+
       const response = await fetch('/api/geo/resolve-address', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
