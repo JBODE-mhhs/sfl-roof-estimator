@@ -137,16 +137,19 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
         // Use more realistic coordinates based on the address
         let lat, lng, county
         if (suggestion.description.includes('Miami')) {
-          lat = 25.7617 + (Math.random() - 0.5) * 0.05 // Miami area
-          lng = -80.1918 + (Math.random() - 0.5) * 0.05
+          // Use a specific residential area in Miami
+          lat = 25.7907 + (Math.random() - 0.5) * 0.01 // Coral Gables area
+          lng = -80.1300 + (Math.random() - 0.5) * 0.01
           county = 'Miami-Dade'
         } else if (suggestion.description.includes('Fort Lauderdale')) {
-          lat = 26.1224 + (Math.random() - 0.5) * 0.05 // Fort Lauderdale area
-          lng = -80.1373 + (Math.random() - 0.5) * 0.05
+          // Use a specific residential area in Fort Lauderdale
+          lat = 26.1224 + (Math.random() - 0.5) * 0.01 // Downtown Fort Lauderdale area
+          lng = -80.1373 + (Math.random() - 0.5) * 0.01
           county = 'Broward'
         } else {
-          lat = 26.7153 + (Math.random() - 0.5) * 0.05 // West Palm Beach area
-          lng = -80.0534 + (Math.random() - 0.5) * 0.05
+          // Use a specific residential area in West Palm Beach
+          lat = 26.7153 + (Math.random() - 0.5) * 0.01 // Downtown West Palm Beach area
+          lng = -80.0534 + (Math.random() - 0.5) * 0.01
           county = 'Palm Beach'
         }
 

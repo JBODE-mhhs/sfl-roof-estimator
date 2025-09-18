@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "cd sfl-roof-estimator && npm run build",
+  "installCommand": "cd sfl-roof-estimator && npm install --legacy-peer-deps",
   "builds": [
     {
       "src": "sfl-roof-estimator/package.json",
