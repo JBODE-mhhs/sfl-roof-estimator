@@ -287,7 +287,7 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       <form onSubmit={handleManualSubmit} className="relative">
         <div className="relative">
           <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -323,7 +323,7 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
       </form>
 
       {suggestions.length > 0 && (
-        <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border shadow-lg">
           <div className="p-2">
             {suggestions.map((suggestion) => (
               <button

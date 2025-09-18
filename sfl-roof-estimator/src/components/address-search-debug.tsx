@@ -37,44 +37,25 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
   const [error, setError] = useState<string | null>(null)
   const autocompleteService = useRef<any>(null)
 
-  // Debug suggestions state changes
-  useEffect(() => {
-    console.log('🔍 Suggestions state updated:', suggestions.length, suggestions)
-  }, [suggestions])
 
   useEffect(() => {
-    console.log('🔍 AddressSearch: Checking for Google Maps API...')
-    console.log('🔍 isGoogleMapsLoaded prop:', isGoogleMapsLoaded)
-    console.log('🔍 window.google:', !!(window as any).google)
-    console.log('🔍 window.google.maps:', !!(window as any).google?.maps)
-    console.log('🔍 window.google.maps.places:', !!(window as any).google?.maps?.places)
-    
     if (isGoogleMapsLoaded && typeof window !== 'undefined' && (window as any).google?.maps?.places) {
-      console.log('🔍 AddressSearch: Initializing AutocompleteService')
       autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
-    } else {
-      console.log('🔍 AddressSearch: Google Places API not available yet')
     }
   }, [isGoogleMapsLoaded])
 
   const getSuggestions = useCallback(
     debounce(async (searchQuery: string) => {
-      console.log('🔍 getSuggestions called with:', searchQuery)
-      
       if (!searchQuery || !searchQuery.trim()) {
-        console.log('🔍 Empty query, clearing suggestions')
         setSuggestions([])
         return
       }
 
       // Check if Google Maps API is available
       if (!autocompleteService.current) {
-        console.log('🔍 Google Places API not available, checking API key...')
         const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-        console.log('🔍 API Key available:', !!apiKey)
         
         if (!apiKey) {
-          console.error('🔍 Google Maps API key not found in environment')
           setError('Address search temporarily unavailable. Please try again later.')
           setIsLoading(false)
           return
@@ -84,7 +65,6 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
         if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
           autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
         } else {
-          console.log('🔍 Google Places API still not available, using mock suggestions')
           const mockSuggestions = [
             {
               placeId: 'mock-1',
@@ -95,7 +75,6 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
               }
             }
           ]
-          console.log('🔍 Setting mock suggestions:', mockSuggestions)
           setTimeout(() => {
             setIsLoading(false)
             setSuggestions(mockSuggestions)
@@ -106,7 +85,6 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
 
       setIsLoading(true)
       setError(null)
-      console.log('🔍 Making Places API request...')
 
       try {
         const request = {
@@ -120,7 +98,6 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
         }
 
         autocompleteService.current.getPlacePredictions(request, (predictions: any, status: any) => {
-          console.log('🔍 Places API response:', { status, predictionsCount: predictions?.length })
           setIsLoading(false)
 
           if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
@@ -131,18 +108,13 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
               )
               .slice(0, 5)
 
-            console.log('🔍 Filtered Florida results:', floridaResults)
             const mappedSuggestions = floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
               structuredFormatting: p.structured_formatting
             }))
-            console.log('🔍 Mapped suggestions:', mappedSuggestions)
-            console.log('🔍 About to call setSuggestions with:', mappedSuggestions)
             setSuggestions(mappedSuggestions)
-            console.log('🔍 setSuggestions called')
           } else {
-            console.error('🔍 Places API error:', status)
             // Fallback to mock suggestions on API error
             const mockSuggestions = [
               {
@@ -154,12 +126,10 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
                 }
               }
             ]
-            console.log('🔍 Setting fallback mock suggestions:', mockSuggestions)
             setSuggestions(mockSuggestions)
           }
         })
       } catch (err) {
-        console.error('🔍 Address autocomplete error:', err)
         setIsLoading(false)
         setError('Unable to search addresses. Please try again.')
       }
@@ -169,13 +139,11 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    console.log('🔍 Input changed to:', value)
     setQuery(value)
     getSuggestions(value)
   }
 
   const handleAddressSelect = async (suggestion: AddressSuggestion) => {
-    console.log('🔍 Suggestion clicked:', suggestion)
     setIsResolving(true)
     setError(null)
     setSuggestions([])
@@ -191,14 +159,12 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
         streetViewUrl: undefined
       }
       
-      console.log('🔍 Using mock data:', mockData)
       setTimeout(() => {
         setQuery(suggestion.structuredFormatting.mainText)
         onAddressSelect(mockData)
         setIsResolving(false)
       }, 1000)
     } catch (err) {
-      console.error('🔍 Address resolution error:', err)
       setError(err instanceof Error ? err.message : 'Failed to resolve address')
     } finally {
       setIsResolving(false)
@@ -221,8 +187,6 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
     }
   }
 
-  console.log('🔍 Render - suggestions.length:', suggestions.length)
-  console.log('🔍 Render - suggestions:', suggestions)
 
   return (
     <div className="space-y-4 relative">
@@ -260,25 +224,10 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
         )}
       </form>
 
-      {/* Debug info */}
-      <div className="text-xs text-gray-500">
-        Debug: suggestions.length = {suggestions.length}
-      </div>
-
-      {/* Force show suggestions for testing */}
-      {suggestions.length > 0 && (
-        <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded">
-          <div className="text-sm font-bold">TEST: Suggestions should appear below this box</div>
-          <div className="text-xs">Count: {suggestions.length}</div>
-        </div>
-      )}
 
       {suggestions.length > 0 && (
         <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border shadow-lg">
           <div className="p-2">
-            <div className="text-xs text-gray-500 mb-2">
-              Debug: Rendering {suggestions.length} suggestions
-            </div>
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.placeId}
