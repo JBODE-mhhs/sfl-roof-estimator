@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MeasurementService } from '@/lib/measurement/measurement-service';
-import { prisma } from '@/lib/db';
 import { addressSchema } from '@/lib/validation';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
+
+// Lazy load these to prevent build-time database connections
+let MeasurementService: any;
+let prisma: any;
+
+async function getMeasurementService() {
+  if (!MeasurementService) {
+    const { MeasurementService: MS } = await import('@/lib/measurement/measurement-service');
+    const { prisma: p } = await import('@/lib/db');
+    MeasurementService = MS;
+    prisma = p;
+  }
+  return { MeasurementService, prisma };
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -27,7 +39,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { query } = addressSchema.parse(body);
 
-    const measurementService = new MeasurementService(prisma);
+    const { MeasurementService: MS, prisma: p } = await getMeasurementService();
+    const measurementService = new MS(p);
     const result = await measurementService.resolveAddress(query);
 
     // Get Street View thumbnail if available

@@ -56,7 +56,7 @@ export async function PATCH(request: NextRequest) {
     let totalPriceCents = 0;
 
     for (const sectionUpdate of sections) {
-      const existingSection = quote.sections.find(s => s.id === sectionUpdate.sectionId);
+      const existingSection = quote.sections.find((s: any) => s.id === sectionUpdate.sectionId);
       if (!existingSection) {
         continue;
       }
@@ -135,7 +135,7 @@ export async function PATCH(request: NextRequest) {
             financingOptions.overallRange.monthlyMax
           )
         },
-        sections: updatedQuote.sections.map(section => ({
+        sections: updatedQuote.sections.map((section: any) => ({
           id: section.id,
           kind: section.kind,
           selectedSystem: section.selectedSystem,
