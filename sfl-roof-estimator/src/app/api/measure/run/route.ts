@@ -66,3 +66,8 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Add GET method to prevent build errors
+export async function GET() {
+  return NextResponse.json({ message: 'Measurement API' });
+}
