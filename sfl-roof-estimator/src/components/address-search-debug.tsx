@@ -225,7 +225,7 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
   console.log('🔍 Render - suggestions:', suggestions)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
       <form onSubmit={handleManualSubmit} className="relative">
         <div className="relative">
           <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -265,8 +265,16 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
         Debug: suggestions.length = {suggestions.length}
       </div>
 
+      {/* Force show suggestions for testing */}
       {suggestions.length > 0 && (
-        <Card className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto">
+        <div className="mt-2 p-2 bg-yellow-100 border border-yellow-300 rounded">
+          <div className="text-sm font-bold">TEST: Suggestions should appear below this box</div>
+          <div className="text-xs">Count: {suggestions.length}</div>
+        </div>
+      )}
+
+      {suggestions.length > 0 && (
+        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border shadow-lg">
           <div className="p-2">
             <div className="text-xs text-gray-500 mb-2">
               Debug: Rendering {suggestions.length} suggestions
@@ -292,3 +300,4 @@ export function AddressSearchDebug({ onAddressSelect, disabled = false, isGoogle
     </div>
   )
 }
+
