@@ -137,8 +137,12 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
         // Try to get real coordinates using a more specific geocoding approach
         let lat, lng, county
         
+        console.log('Processing address:', suggestion.description)
+        console.log('Address contains 1065:', suggestion.description.toLowerCase().includes('1065'))
+        console.log('Address contains sw 141:', suggestion.description.toLowerCase().includes('sw 141'))
+        
         // For specific known addresses, use exact coordinates
-        if (suggestion.description.toLowerCase().includes('1065 sw 141')) {
+        if (suggestion.description.toLowerCase().includes('1065') && suggestion.description.toLowerCase().includes('sw 141')) {
           // Exact coordinates for 1065 SW 141st Ct, Miami, FL 33184 (Westchester area)
           lat = 25.7600  // Westchester area latitude
           lng = -80.3200  // Westchester area longitude
