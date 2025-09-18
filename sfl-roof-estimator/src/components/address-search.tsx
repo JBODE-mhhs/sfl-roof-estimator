@@ -126,6 +126,7 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
   }
 
   const handleAddressSelect = async (suggestion: AddressSuggestion) => {
+    console.log('Suggestion clicked:', suggestion) // Debug log
     setIsResolving(true)
     setError(null)
     setSuggestions([])
@@ -143,6 +144,7 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
           streetViewUrl: undefined
         }
         
+        console.log('Using mock data:', mockData) // Debug log
         setTimeout(() => {
           setQuery(suggestion.structuredFormatting.mainText)
           onAddressSelect(mockData)
