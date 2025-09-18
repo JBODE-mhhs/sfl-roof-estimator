@@ -54,7 +54,7 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
 
   const getSuggestions = useCallback(
     debounce(async (searchQuery: string) => {
-      if (!searchQuery.trim()) {
+      if (!searchQuery || !searchQuery.trim()) {
         setSuggestions([])
         return
       }
@@ -265,7 +265,7 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!query.trim()) return
+    if (!query || !query.trim()) return
 
     // Try to find exact match in suggestions
     const exactMatch = suggestions.find(s =>
