@@ -198,7 +198,7 @@ export class PricingCalculationService {
     const result: Record<string, number> = {};
     for (const [key, value] of Object.entries(multipliers || {})) {
       if (typeof value === 'object') {
-        result[key] = this.convertMultipliersToNumbers(value);
+        Object.assign(result, this.convertMultipliersToNumbers(value));
       } else if (typeof value === 'number') {
         result[key] = value;
       }

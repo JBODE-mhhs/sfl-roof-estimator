@@ -76,9 +76,9 @@ export class FinanceCalculationService {
           aprMax: plan.aprMax,
           termMinMonths: plan.termMinMonths,
           termMaxMonths: plan.termMaxMonths,
-          dealerFeePercent: plan.dealerFeePercent,
-          amountMinCents: plan.amountMinCents,
-          amountMaxCents: plan.amountMaxCents,
+          dealerFeePercent: plan.dealerFeePercent ?? undefined,
+          amountMinCents: plan.amountMinCents ?? undefined,
+          amountMaxCents: plan.amountMaxCents ?? undefined,
           ...calculation
         };
       });

@@ -54,7 +54,7 @@ export class MeasurementService {
         data: {
           method: measurementResult.method,
           quality: measurementResult.quality,
-          rawJson: measurementResult,
+          rawJson: measurementResult as any,
         },
       });
 

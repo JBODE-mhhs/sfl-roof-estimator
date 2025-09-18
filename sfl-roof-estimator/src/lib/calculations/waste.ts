@@ -83,7 +83,7 @@ export class WasteCalculationService {
         this.cachedRules = DEFAULT_WASTE_RULES;
       }
 
-      return this.cachedRules;
+      return this.cachedRules!;
     } catch (error) {
       console.warn('Failed to load waste rules from database, using defaults:', error);
       return DEFAULT_WASTE_RULES;

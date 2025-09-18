@@ -79,7 +79,7 @@ export default function HomePage() {
 
   const handleAnalysisComplete = (result: any) => {
     if (quoteId) {
-      router.push(`/estimate/${quoteId}`)
+      router.push(`/estimate/${quoteId}` as any)
     }
   }
 

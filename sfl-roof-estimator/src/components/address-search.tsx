@@ -34,11 +34,11 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
   const [isLoading, setIsLoading] = useState(false)
   const [isResolving, setIsResolving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null)
+  const autocompleteService = useRef<any>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.google) {
-      autocompleteService.current = new window.google.maps.places.AutocompleteService()
+    if (typeof window !== 'undefined' && (window as any).google) {
+      autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
     }
   }, [])
 
@@ -57,24 +57,24 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
           input: searchQuery,
           types: ['address'],
           componentRestrictions: { country: 'us' },
-          bounds: new window.google.maps.LatLngBounds(
-            new window.google.maps.LatLng(25.0, -81.0), // SW Florida
-            new window.google.maps.LatLng(27.0, -79.8)  // NE Florida
+          bounds: new (window as any).google.maps.LatLngBounds(
+            new (window as any).google.maps.LatLng(25.0, -81.0), // SW Florida
+            new (window as any).google.maps.LatLng(27.0, -79.8)  // NE Florida
           )
         }
 
-        autocompleteService.current.getPlacePredictions(request, (predictions, status) => {
+        autocompleteService.current.getPlacePredictions(request, (predictions: any, status: any) => {
           setIsLoading(false)
 
-          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+          if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
             const floridaResults = predictions
-              .filter(prediction =>
+              .filter((prediction: any) =>
                 prediction.description.toLowerCase().includes('fl') ||
                 prediction.description.toLowerCase().includes('florida')
               )
               .slice(0, 5)
 
-            setSuggestions(floridaResults.map(p => ({
+            setSuggestions(floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
               structuredFormatting: p.structured_formatting

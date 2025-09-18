@@ -20,7 +20,7 @@ export function rateLimit(
   const windowStart = now - windowMs;
 
   // Clean up old entries
-  for (const [key, data] of requests.entries()) {
+  for (const [key, data] of Array.from(requests.entries())) {
     if (data.reset < windowStart) {
       requests.delete(key);
     }

@@ -25,13 +25,13 @@ export function MapConfirm({
   disabled = false
 }: MapConfirmProps) {
   const mapRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<google.maps.Map | null>(null)
+  const mapInstanceRef = useRef<any>(null)
   const [streetViewVisible, setStreetViewVisible] = useState(false)
 
   useEffect(() => {
-    if (!mapRef.current || !window.google) return
+    if (!mapRef.current || !(window as any).google) return
 
-    const map = new window.google.maps.Map(mapRef.current, {
+    const map = new (window as any).google.maps.Map(mapRef.current, {
       center: { lat, lng },
       zoom: 18,
       mapTypeId: 'satellite',
@@ -45,12 +45,12 @@ export function MapConfirm({
     })
 
     // Add marker
-    new window.google.maps.Marker({
+    new (window as any).google.maps.Marker({
       position: { lat, lng },
       map,
       title: address,
       icon: {
-        path: window.google.maps.SymbolPath.CIRCLE,
+        path: (window as any).google.maps.SymbolPath.CIRCLE,
         scale: 10,
         fillColor: '#3b82f6',
         fillOpacity: 1,
@@ -60,11 +60,11 @@ export function MapConfirm({
     })
 
     // Add property boundary highlight (simulated)
-    const bounds = new window.google.maps.LatLngBounds()
+    const bounds = new (window as any).google.maps.LatLngBounds()
     const offsetLat = 0.0002
     const offsetLng = 0.0002
 
-    const rectangle = new window.google.maps.Rectangle({
+    const rectangle = new (window as any).google.maps.Rectangle({
       bounds: {
         north: lat + offsetLat,
         south: lat - offsetLat,
