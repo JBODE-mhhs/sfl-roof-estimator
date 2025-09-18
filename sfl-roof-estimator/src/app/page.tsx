@@ -171,6 +171,7 @@ export default function HomePage() {
                   <AddressSearch
                     onAddressSelect={handleAddressSelect}
                     disabled={!isGoogleMapsLoaded}
+                    isGoogleMapsLoaded={isGoogleMapsLoaded}
                   />
                   {!isGoogleMapsLoaded && (
                     <p className="text-sm text-muted-foreground text-center mt-2">

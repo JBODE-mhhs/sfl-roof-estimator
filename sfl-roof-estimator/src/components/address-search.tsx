@@ -26,9 +26,10 @@ interface AddressSearchProps {
     streetViewUrl?: string
   }) => void
   disabled?: boolean
+  isGoogleMapsLoaded?: boolean
 }
 
-export function AddressSearch({ onAddressSelect, disabled = false }: AddressSearchProps) {
+export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsLoaded = false }: AddressSearchProps) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -38,17 +39,18 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
 
   useEffect(() => {
     console.log('AddressSearch: Checking for Google Maps API...')
+    console.log('isGoogleMapsLoaded prop:', isGoogleMapsLoaded)
     console.log('window.google:', !!(window as any).google)
     console.log('window.google.maps:', !!(window as any).google?.maps)
     console.log('window.google.maps.places:', !!(window as any).google?.maps?.places)
     
-    if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+    if (isGoogleMapsLoaded && typeof window !== 'undefined' && (window as any).google?.maps?.places) {
       console.log('AddressSearch: Initializing AutocompleteService')
       autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
     } else {
-      console.log('AddressSearch: Google Places API not available')
+      console.log('AddressSearch: Google Places API not available yet')
     }
-  }, [])
+  }, [isGoogleMapsLoaded])
 
   const getSuggestions = useCallback(
     debounce(async (searchQuery: string) => {
