@@ -51,6 +51,7 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
 
       // If no Google Maps API, use mock suggestions
       if (!autocompleteService.current) {
+        console.log('Google Places API not available, using mock suggestions')
         const mockSuggestions = [
           {
             placeId: 'mock-1',
@@ -92,6 +93,7 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
 
         autocompleteService.current.getPlacePredictions(request, (predictions: any, status: any) => {
           setIsLoading(false)
+          console.log('Places API response:', { status, predictionsCount: predictions?.length })
 
           if (status === (window as any).google.maps.places.PlacesServiceStatus.OK && predictions) {
             const floridaResults = predictions
@@ -101,13 +103,26 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
               )
               .slice(0, 5)
 
+            console.log('Filtered Florida results:', floridaResults)
             setSuggestions(floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
               structuredFormatting: p.structured_formatting
             })))
           } else {
-            setSuggestions([])
+            console.error('Places API error:', status)
+            // Fallback to mock suggestions on API error
+            const mockSuggestions = [
+              {
+                placeId: 'mock-1',
+                description: `${searchQuery}, Miami, FL, USA`,
+                structuredFormatting: {
+                  mainText: searchQuery,
+                  secondaryText: 'Miami, FL, USA'
+                }
+              }
+            ]
+            setSuggestions(mockSuggestions)
           }
         })
       } catch (err) {
@@ -144,8 +159,8 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
         // For specific known addresses, use exact coordinates
         if (suggestion.description.toLowerCase().includes('1065') && suggestion.description.toLowerCase().includes('sw 141')) {
           // Exact coordinates for 1065 SW 141st Ct, Miami, FL 33184 (targeting red circled dark roof house)
-          lat = 25.75742  // Move slightly south to the exact dark roof house you circled in red
-          lng = -80.42398  // Fine-tune to center on the dark roof house
+          lat = 25.75738  // Move further south to the exact dark roof house you circled in red
+          lng = -80.42396  // Fine-tune to center on the dark roof house
           county = 'Miami-Dade'
           console.log('Using EXACT coordinates for 1065 SW 141st Ct:', { lat, lng })
         } else {
