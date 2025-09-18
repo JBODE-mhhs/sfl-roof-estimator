@@ -134,23 +134,40 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
     try {
       // Mock data for testing when API is not available
       if (suggestion.placeId.startsWith('mock-')) {
-        // Use more realistic coordinates based on the address
+        // Try to get real coordinates using a simple geocoding approach
         let lat, lng, county
-        if (suggestion.description.includes('Miami')) {
-          // Use a specific residential area in Miami
-          lat = 25.7907 + (Math.random() - 0.5) * 0.01 // Coral Gables area
-          lng = -80.1300 + (Math.random() - 0.5) * 0.01
-          county = 'Miami-Dade'
-        } else if (suggestion.description.includes('Fort Lauderdale')) {
-          // Use a specific residential area in Fort Lauderdale
-          lat = 26.1224 + (Math.random() - 0.5) * 0.01 // Downtown Fort Lauderdale area
-          lng = -80.1373 + (Math.random() - 0.5) * 0.01
-          county = 'Broward'
-        } else {
-          // Use a specific residential area in West Palm Beach
-          lat = 26.7153 + (Math.random() - 0.5) * 0.01 // Downtown West Palm Beach area
-          lng = -80.0534 + (Math.random() - 0.5) * 0.01
-          county = 'Palm Beach'
+        
+        // For testing, let's use a more accurate approach
+        // Try to geocode the address using a simple API call
+        try {
+          const geocodeResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(suggestion.description)}&limit=1&countrycodes=us`)
+          const geocodeData = await geocodeResponse.json()
+          
+          if (geocodeData && geocodeData.length > 0) {
+            lat = parseFloat(geocodeData[0].lat)
+            lng = parseFloat(geocodeData[0].lon)
+            county = suggestion.description.includes('Miami') ? 'Miami-Dade' : 
+                    suggestion.description.includes('Fort Lauderdale') ? 'Broward' : 'Palm Beach'
+            console.log('Real coordinates found:', { lat, lng })
+          } else {
+            throw new Error('No geocoding results')
+          }
+        } catch (error) {
+          console.log('Geocoding failed, using fallback coordinates')
+          // Fallback to approximate coordinates
+          if (suggestion.description.includes('Miami')) {
+            lat = 25.7907 + (Math.random() - 0.5) * 0.01
+            lng = -80.1300 + (Math.random() - 0.5) * 0.01
+            county = 'Miami-Dade'
+          } else if (suggestion.description.includes('Fort Lauderdale')) {
+            lat = 26.1224 + (Math.random() - 0.5) * 0.01
+            lng = -80.1373 + (Math.random() - 0.5) * 0.01
+            county = 'Broward'
+          } else {
+            lat = 26.7153 + (Math.random() - 0.5) * 0.01
+            lng = -80.0534 + (Math.random() - 0.5) * 0.01
+            county = 'Palm Beach'
+          }
         }
 
         const mockData = {
