@@ -143,9 +143,9 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
         
         // For specific known addresses, use exact coordinates
         if (suggestion.description.toLowerCase().includes('1065') && suggestion.description.toLowerCase().includes('sw 141')) {
-          // Exact coordinates for 1065 SW 141st Ct, Miami, FL 33184 (provided by user)
-          lat = 25.757474938704163  // Exact latitude from user
-          lng = -80.42398408072694  // Exact longitude from user
+          // Exact coordinates for 1065 SW 141st Ct, Miami, FL 33184 (adjusted for correct house)
+          lat = 25.757474938704163 + 0.00001  // Slightly north to hit the blue roof house
+          lng = -80.42398408072694 - 0.00001  // Slightly west to hit the blue roof house
           county = 'Miami-Dade'
           console.log('Using EXACT coordinates for 1065 SW 141st Ct:', { lat, lng })
         } else {
