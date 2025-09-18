@@ -67,8 +67,15 @@ export default function HomePage() {
         setQuoteId(data.quoteId)
         setCurrentStep('confirm')
       } else {
-        const errorData = await response.json()
-        console.error('API Error:', errorData) // Debug log
+        console.error('API Response Status:', response.status) // Debug log
+        let errorData
+        try {
+          errorData = await response.json()
+          console.error('API Error Data:', errorData) // Debug log
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+          errorData = { error: 'Unknown API error' }
+        }
         throw new Error(errorData.error || 'Failed to create quote')
       }
     } catch (error) {

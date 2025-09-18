@@ -33,6 +33,13 @@ export async function POST(request: NextRequest) {
 
     const prisma = await getPrisma();
     
+    if (!prisma) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
+    }
+    
     // Create the quote
     const quote = await prisma.quote.create({
       data: {
