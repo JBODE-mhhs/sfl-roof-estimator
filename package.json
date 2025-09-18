@@ -4,7 +4,8 @@
   "description": "GoHighLevel MCP Server for Claude Desktop and ChatGPT integration",
   "main": "dist/server.js",
   "bin": {
-    "ghl-mcp-server": "dist/server.js"
+    "ghl-mcp-server": "dist/server.js",
+    "claude": "bin/claude.js"
   },
   "files": [
     "dist/",

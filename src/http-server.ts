@@ -32,7 +32,7 @@ import { CustomFieldV2Tools } from './tools/custom-field-v2-tools';
 import { WorkflowTools } from './tools/workflow-tools';
 import { SurveyTools } from './tools/survey-tools';
 import { StoreTools } from './tools/store-tools';
-import { ProductsTools } from './tools/products-tools.js';
+import { ProductsTools } from './tools/products-tools';
 import { GHLConfig } from './types/ghl-types';
 
 // Load environment variables
@@ -139,25 +139,27 @@ class GHLMCPHttpServer {
   private initializeGHLClient(): GHLApiClient {
     // Load configuration from environment
     const config: GHLConfig = {
-      accessToken: process.env.GHL_API_KEY || '',
+      accessToken: process.env.GHL_API_KEY || 'demo-token',
       baseUrl: process.env.GHL_BASE_URL || 'https://services.leadconnectorhq.com',
       version: '2021-07-28',
-      locationId: process.env.GHL_LOCATION_ID || ''
+      locationId: process.env.GHL_LOCATION_ID || 'demo-location'
     };
 
-    // Validate required configuration
-    if (!config.accessToken) {
-      throw new Error('GHL_API_KEY environment variable is required');
-    }
+    // Check if we have valid credentials
+    const hasValidCredentials = config.accessToken && 
+                               config.accessToken !== 'your_private_integrations_api_key_here' &&
+                               config.locationId && 
+                               config.locationId !== 'your_location_id_here';
 
-    if (!config.locationId) {
-      throw new Error('GHL_LOCATION_ID environment variable is required');
+    if (!hasValidCredentials) {
+      console.warn('[GHL MCP HTTP] ⚠️  Using demo credentials - configure real credentials for full functionality');
     }
 
     console.log('[GHL MCP HTTP] Initializing GHL API client...');
     console.log(`[GHL MCP HTTP] Base URL: ${config.baseUrl}`);
     console.log(`[GHL MCP HTTP] Version: ${config.version}`);
     console.log(`[GHL MCP HTTP] Location ID: ${config.locationId}`);
+    console.log(`[GHL MCP HTTP] Mode: ${hasValidCredentials ? 'Production' : 'Demo'}`);
 
     return new GHLApiClient(config);
   }
@@ -669,13 +671,20 @@ class GHLMCPHttpServer {
     try {
       console.log('[GHL MCP HTTP] Testing GHL API connection...');
       
+      // Check if we have valid credentials
+      if (!process.env.GHL_API_KEY || process.env.GHL_API_KEY === 'your_private_integrations_api_key_here') {
+        console.warn('[GHL MCP HTTP] ⚠️  GHL API credentials not configured - running in demo mode');
+        console.warn('[GHL MCP HTTP] To use real GHL API features, configure GHL_API_KEY and GHL_LOCATION_ID in .env');
+        return;
+      }
+      
       const result = await this.ghlClient.testConnection();
       
       console.log('[GHL MCP HTTP] ✅ GHL API connection successful');
       console.log(`[GHL MCP HTTP] Connected to location: ${result.data?.locationId}`);
     } catch (error) {
       console.error('[GHL MCP HTTP] ❌ GHL API connection failed:', error);
-      throw new Error(`Failed to connect to GHL API: ${error}`);
+      console.warn('[GHL MCP HTTP] ⚠️  Running in demo mode - configure credentials for full functionality');
     }
   }
 

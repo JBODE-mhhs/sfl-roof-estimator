@@ -1,0 +1,247 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String?
+  role           Role     @default(VIEWER)
+  hashedPassword String?
+  emailVerified  DateTime?
+  image          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  ADMIN
+  SALES
+  VIEWER
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  address         String
+  placeId         String
+  lat             Float
+  lng             Float
+  county          String
+  status          QuoteStatus @default(DRAFT)
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  totalPrice      Int?        // in cents
+  monthlyMin      Int?        // in cents
+  monthlyMax      Int?        // in cents
+  measurementId   String?     @unique
+  measurement     Measurement? @relation(fields: [measurementId], references: [id])
+  sections        RoofSection[]
+  leads           Lead[]
+
+  @@index([createdAt])
+  @@index([status])
+  @@index([county])
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  BOOKED
+  CLOSED_LOST
+}
+
+model Measurement {
+  id        String   @id @default(cuid())
+  method    String   // "thirdParty" | "heuristic" | "manual"
+  quality   String   // "high" | "medium" | "low"
+  rawJson   Json
+  createdAt DateTime @default(now())
+  quote     Quote?
+  sections  RoofSection[]
+
+  @@index([createdAt])
+  @@index([method])
+  @@index([quality])
+}
+
+model RoofSection {
+  id                     String      @id @default(cuid())
+  quoteId                String
+  measurementId          String?
+  kind                   SectionKind // SLOPED | FLAT
+  planAreaSqFt          Float
+  pitchRisePer12        Float?      // only sloped
+  complexityFacets      Int         @default(0)
+  complexityHipsValleys Int         @default(0)
+  penetrations          Int         @default(0)
+  wastePercentApplied   Float       // computed on server
+  finalAreaSqFt         Float       // after pitch + waste
+  finalSquares          Float
+  selectedSystem        SystemType  // SHINGLE | METAL | FLAT_TPO | FLAT_MODBIT ...
+  priceCents            Int?
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  quote       Quote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  measurement Measurement? @relation(fields: [measurementId], references: [id])
+
+  @@index([quoteId])
+  @@index([kind])
+  @@index([selectedSystem])
+}
+
+enum SectionKind {
+  SLOPED
+  FLAT
+}
+
+enum SystemType {
+  SHINGLE
+  METAL
+  FLAT_TPO
+  FLAT_MODBIT
+  FLAT_BUR
+}
+
+model PricingMatrix {
+  id                 String     @id @default(cuid())
+  county             String     // or "DEFAULT"
+  systemType         SystemType
+  pitchTier          PitchTier? // null for flat
+  storyTier          Int        // 1, 2, 3+
+  tearOffLayers      Int        // 0..2
+  hvhz               Boolean    @default(false)
+  pricePerSquareCents Int
+  multipliers        Json       // { steep:1.1, story:1.05, ... } optional
+  fixedAdders        Json?      // { permit: 50000, disposal: 25000 } in cents
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@unique([county, systemType, pitchTier, storyTier, tearOffLayers, hvhz])
+  @@index([county])
+  @@index([systemType])
+}
+
+enum PitchTier {
+  LOW    // 2/12-4/12
+  MEDIUM // 5/12-7/12
+  STEEP  // 8/12-12/12
+}
+
+model WasteRules {
+  id           String   @id @default(cuid())
+  basePercent  Float    // e.g., 12
+  maxPercent   Float    // e.g., 20
+  addersJson   Json     // { facets:[{min:0,max:6,add:0},{min:7,max:12,add:2}], hipsValleys:[...], penetrations:[...] }
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model FinancePlan {
+  id               String   @id @default(cuid())
+  name             String
+  aprMin           Float
+  aprMax           Float
+  termMinMonths    Int
+  termMaxMonths    Int
+  dealerFeePercent Float?   // optional
+  amountMinCents   Int?
+  amountMaxCents   Int?
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([active])
+}
+
+model Lead {
+  id            String   @id @default(cuid())
+  quoteId       String
+  name          String?
+  email         String?
+  phone         String?
+  status        LeadStatus @default(NEW)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([email])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  SCHEDULED
+  CONVERTED
+  LOST
+}
+
+model AppSettings {
+  id               String   @id @default(cuid())
+  brandName        String   @default("SFL Roof Estimator")
+  primaryColor     String   @default("#3b82f6")
+  logoUrl          String?
+  supportPhone     String   @default("(305) 555-0123")
+  supportEmail     String   @default("support@sflroof.com")
+  serviceCounties  Json     @default("[\"Miami-Dade\", \"Broward\", \"Palm Beach\"]")
+  disclaimerText   String   @default("Estimates are based on remote measurements and may be adjusted after on-site inspection.")
+  ctaButtonText    String   @default("Get Free Inspection")
+  enableDetached   Boolean  @default(true)
+  maxQuotesPerHour Int      @default(10)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
