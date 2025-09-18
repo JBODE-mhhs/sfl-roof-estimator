@@ -35,6 +35,11 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
   const [isLoading, setIsLoading] = useState(false)
   const [isResolving, setIsResolving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Debug suggestions state changes
+  useEffect(() => {
+    console.log('Suggestions state updated:', suggestions.length, suggestions)
+  }, [suggestions])
   const autocompleteService = useRef<any>(null)
 
   useEffect(() => {
@@ -130,11 +135,13 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
               .slice(0, 5)
 
             console.log('Filtered Florida results:', floridaResults)
-            setSuggestions(floridaResults.map((p: any) => ({
+            const mappedSuggestions = floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
               structuredFormatting: p.structured_formatting
-            })))
+            }))
+            console.log('Mapped suggestions:', mappedSuggestions)
+            setSuggestions(mappedSuggestions)
           } else {
             console.error('Places API error:', status)
             // Fallback to mock suggestions on API error
