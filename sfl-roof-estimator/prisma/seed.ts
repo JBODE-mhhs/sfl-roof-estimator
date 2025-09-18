@@ -80,11 +80,15 @@ async function main() {
   ]
 
   for (const plan of financePlans) {
-    await prisma.financePlan.upsert({
-      where: { name: plan.name },
-      update: {},
-      create: plan
-    })
+    // Model does not have a unique constraint on name, so we can't use upsert by name.
+    // Ensure idempotency by checking for an existing plan with the same name first.
+    const existingPlan = await prisma.financePlan.findFirst({ where: { name: plan.name } })
+    if (existingPlan) {
+      // Nothing to update right now; keep seed idempotent without mutating existing data
+      continue
+    } else {
+      await prisma.financePlan.create({ data: plan })
+    }
   }
   console.log('✅ Finance plans created')
 
@@ -154,30 +158,32 @@ async function main() {
                 cleanup: 15000 // $150
               }
 
-              await prisma.pricingMatrix.upsert({
+              const existingPricing = await prisma.pricingMatrix.findFirst({
                 where: {
-                  county_systemType_pitchTier_storyTier_tearOffLayers_hvhz: {
-                    county,
-                    systemType: systemType as any,
-                    pitchTier: pitchTier as any,
-                    storyTier,
-                    tearOffLayers: tearOff,
-                    hvhz
-                  }
-                },
-                update: {},
-                create: {
                   county,
                   systemType: systemType as any,
                   pitchTier: pitchTier as any,
                   storyTier,
                   tearOffLayers: tearOff,
-                  hvhz,
-                  pricePerSquareCents: pricePerSquare,
-                  multipliers,
-                  fixedAdders
+                  hvhz
                 }
               })
+
+              if (!existingPricing) {
+                await prisma.pricingMatrix.create({
+                  data: {
+                    county,
+                    systemType: systemType as any,
+                    pitchTier: pitchTier as any,
+                    storyTier,
+                    tearOffLayers: tearOff,
+                    hvhz,
+                    pricePerSquareCents: pricePerSquare,
+                    multipliers,
+                    fixedAdders
+                  }
+                })
+              }
             }
           }
         }
