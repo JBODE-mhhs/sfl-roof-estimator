@@ -30,13 +30,23 @@ export default function HomePage() {
 
   // Load Google Maps API
   useEffect(() => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    console.log('Google Maps API Key available:', !!apiKey)
+    console.log('API Key (first 10 chars):', apiKey?.substring(0, 10))
+    
+    if (!apiKey) {
+      console.error('Google Maps API key not found!')
+      return
+    }
+
     const loader = new Loader({
-      apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+      apiKey: apiKey,
       version: 'weekly',
       libraries: ['places', 'geometry']
     })
 
     loader.load().then(() => {
+      console.log('Google Maps API loaded successfully')
       setIsGoogleMapsLoaded(true)
     }).catch((error) => {
       console.error('Failed to load Google Maps:', error)

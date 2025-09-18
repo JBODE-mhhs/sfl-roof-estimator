@@ -37,8 +37,16 @@ export function AddressSearch({ onAddressSelect, disabled = false }: AddressSear
   const autocompleteService = useRef<any>(null)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && (window as any).google) {
+    console.log('AddressSearch: Checking for Google Maps API...')
+    console.log('window.google:', !!(window as any).google)
+    console.log('window.google.maps:', !!(window as any).google?.maps)
+    console.log('window.google.maps.places:', !!(window as any).google?.maps?.places)
+    
+    if (typeof window !== 'undefined' && (window as any).google?.maps?.places) {
+      console.log('AddressSearch: Initializing AutocompleteService')
       autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
+    } else {
+      console.log('AddressSearch: Google Places API not available')
     }
   }, [])
 
