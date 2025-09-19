@@ -330,9 +330,10 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
       )}
 
       {suggestions.length > 0 && (
-        <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border shadow-lg">
-          <div className="p-2">
-            {suggestions.map((suggestion) => (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1">
+          <Card className="w-full max-h-60 overflow-y-auto bg-white border shadow-lg">
+            <div className="p-2">
+              {suggestions.map((suggestion) => (
               <button
                 key={suggestion.placeId}
                 onClick={() => handleAddressSelect(suggestion)}
@@ -346,9 +347,10 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
                   {suggestion.structuredFormatting.secondaryText}
                 </div>
               </button>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        </div>
       )}
     </div>
   )
