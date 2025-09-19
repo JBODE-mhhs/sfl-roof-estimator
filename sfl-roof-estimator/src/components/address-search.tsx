@@ -36,9 +36,9 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
   const [isResolving, setIsResolving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Debug suggestions state changes
+  // Debug suggestions state
   useEffect(() => {
-    console.log('Suggestions state updated:', suggestions.length, suggestions)
+    console.log('🔍 Suggestions updated:', suggestions.length, suggestions)
   }, [suggestions])
   const autocompleteService = useRef<any>(null)
 
@@ -321,6 +321,13 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
           <p className="text-sm text-destructive mt-2">{error}</p>
         )}
       </form>
+
+      {/* Force show suggestions for testing */}
+      {suggestions.length > 0 && (
+        <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded">
+          <div className="text-sm font-bold">TEST: {suggestions.length} suggestions found</div>
+        </div>
+      )}
 
       {suggestions.length > 0 && (
         <Card className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border shadow-lg">
