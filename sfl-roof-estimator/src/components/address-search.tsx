@@ -36,24 +36,11 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
   const [isResolving, setIsResolving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Debug suggestions state
-  useEffect(() => {
-    console.log('🔍 Suggestions updated:', suggestions.length, suggestions)
-  }, [suggestions])
   const autocompleteService = useRef<any>(null)
 
   useEffect(() => {
-    console.log('AddressSearch: Checking for Google Maps API...')
-    console.log('isGoogleMapsLoaded prop:', isGoogleMapsLoaded)
-    console.log('window.google:', !!(window as any).google)
-    console.log('window.google.maps:', !!(window as any).google?.maps)
-    console.log('window.google.maps.places:', !!(window as any).google?.maps?.places)
-    
     if (isGoogleMapsLoaded && typeof window !== 'undefined' && (window as any).google?.maps?.places) {
-      console.log('AddressSearch: Initializing AutocompleteService')
       autocompleteService.current = new (window as any).google.maps.places.AutocompleteService()
-    } else {
-      console.log('AddressSearch: Google Places API not available yet')
     }
   }, [isGoogleMapsLoaded])
 
@@ -134,7 +121,6 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
               )
               .slice(0, 5)
 
-            console.log('Filtered Florida results:', floridaResults)
             const mappedSuggestions = floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
@@ -143,7 +129,6 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
                 secondaryText: p.structured_formatting?.secondary_text || p.description.split(',').slice(1).join(',').trim() || 'Florida, USA'
               }
             }))
-            console.log('Mapped suggestions:', mappedSuggestions)
             setSuggestions(mappedSuggestions)
           } else {
             console.error('Places API error:', status)
@@ -242,7 +227,6 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
           streetViewUrl: undefined
         }
         
-        console.log('Using mock data:', mockData) // Debug log
       setTimeout(() => {
         setQuery(suggestion.structuredFormatting?.mainText || suggestion.description)
         onAddressSelect(mockData)
@@ -325,40 +309,23 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
         )}
       </form>
 
-      {/* Force show suggestions for testing */}
-      {suggestions.length > 0 && (
-        <div className="mt-2 p-2 bg-red-100 border border-red-300 rounded">
-          <div className="text-sm font-bold">TEST: {suggestions.length} suggestions found</div>
-        </div>
-      )}
-
       {suggestions.length > 0 && (
         <div className="mt-2 space-y-1">
-          <div className="text-sm font-medium text-gray-600">Suggestions:</div>
-          {suggestions.map((suggestion, index) => {
-            console.log(`Suggestion ${index}:`, suggestion)
-            return (
-              <button
-                key={suggestion.placeId}
-                onClick={() => {
-                  console.log('Clicked suggestion:', suggestion)
-                  handleAddressSelect(suggestion)
-                }}
-                disabled={disabled || isResolving}
-                className="w-full text-left p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
-              >
-                <div className="font-medium text-sm">
-                  {suggestion.structuredFormatting?.mainText || suggestion.description || 'No main text'}
-                </div>
-                <div className="text-sm text-gray-500">
-                  {suggestion.structuredFormatting?.secondaryText || 'No secondary text'}
-                </div>
-                <div className="text-xs text-gray-400 mt-1">
-                  Debug: {JSON.stringify(suggestion.structuredFormatting)}
-                </div>
-              </button>
-            )
-          })}
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion.placeId}
+              onClick={() => handleAddressSelect(suggestion)}
+              disabled={disabled || isResolving}
+              className="w-full text-left p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <div className="font-medium text-sm">
+                {suggestion.structuredFormatting?.mainText || suggestion.description}
+              </div>
+              <div className="text-sm text-gray-500">
+                {suggestion.structuredFormatting?.secondaryText}
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>

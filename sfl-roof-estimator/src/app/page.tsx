@@ -233,7 +233,6 @@ export default function HomePage() {
             address={addressData.formattedAddress}
             lat={addressData.lat}
             lng={addressData.lng}
-            streetViewUrl={addressData.streetViewUrl}
             onConfirm={handleConfirmAddress}
             onCancel={handleBackToSearch}
             onLocationChange={handleLocationChange}

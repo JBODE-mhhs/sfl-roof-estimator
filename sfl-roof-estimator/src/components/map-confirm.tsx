@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MapPin, Eye, CheckCircle, XCircle } from 'lucide-react'
+import { MapPin, CheckCircle, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -9,7 +9,6 @@ interface MapConfirmProps {
   address: string
   lat: number
   lng: number
-  streetViewUrl?: string
   onConfirm: () => void
   onCancel: () => void
   onLocationChange?: (lat: number, lng: number) => void
@@ -20,7 +19,6 @@ export function MapConfirm({
   address,
   lat,
   lng,
-  streetViewUrl,
   onConfirm,
   onCancel,
   onLocationChange,
@@ -28,20 +26,19 @@ export function MapConfirm({
 }: MapConfirmProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<any>(null)
-  const [streetViewVisible, setStreetViewVisible] = useState(false)
 
   useEffect(() => {
     if (!mapRef.current || !(window as any).google) return
 
     const map = new (window as any).google.maps.Map(mapRef.current, {
       center: { lat, lng },
-      zoom: 18,
+      zoom: 19,
       mapTypeId: 'satellite',
       disableDefaultUI: false,
       zoomControl: true,
       mapTypeControl: true,
       scaleControl: true,
-      streetViewControl: true,
+      streetViewControl: false,
       rotateControl: true,
       fullscreenControl: false
     })
@@ -100,10 +97,6 @@ export function MapConfirm({
     mapInstanceRef.current = map
   }, [lat, lng, address])
 
-  const handleStreetViewToggle = () => {
-    setStreetViewVisible(!streetViewVisible)
-  }
-
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -114,75 +107,32 @@ export function MapConfirm({
       </div>
 
       <Card>
-        <CardContent className="p-0">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Satellite Map */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 pb-0">
-                <h3 className="font-semibold">Satellite View</h3>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  Property Location
-                </div>
-              </div>
-
-              <div className="px-4 pb-4">
-                <div
-                  ref={mapRef}
-                  className="map-container border rounded-lg"
-                  style={{ height: '300px' }}
-                />
-                <p className="text-sm text-muted-foreground mt-2">
-                  <strong>{address}</strong>
-                </p>
-                <p className="text-xs text-blue-600 mt-1">
-                  💡 Drag the blue marker to adjust the exact location if needed
-                </p>
+        <CardContent className="p-4">
+          {/* Satellite Map */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">Property Location</h3>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                Satellite View
               </div>
             </div>
 
-            {/* Street View */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 pb-0">
-                <h3 className="font-semibold">Street View</h3>
-                {streetViewUrl && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleStreetViewToggle}
-                    className="text-xs"
-                  >
-                    <Eye className="h-3 w-3 mr-1" />
-                    {streetViewVisible ? 'Hide' : 'Show'} Street
-                  </Button>
-                )}
-              </div>
-
-              <div className="px-4 pb-4">
-                {streetViewUrl && streetViewVisible ? (
-                  <div className="border rounded-lg overflow-hidden">
-                    <img
-                      src={streetViewUrl}
-                      alt="Street view of property"
-                      className="w-full h-[300px] object-cover"
-                    />
-                  </div>
-                ) : (
-                  <div className="border rounded-lg h-[300px] flex items-center justify-center bg-muted/30">
-                    <div className="text-center space-y-2">
-                      <Eye className="h-8 w-8 mx-auto text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        {streetViewUrl ? 'Click "Show Street" to view' : 'Street view not available'}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+            <div
+              ref={mapRef}
+              className="map-container border rounded-lg w-full"
+              style={{ height: '400px' }}
+            />
+            <p className="text-sm text-muted-foreground">
+              <strong>{address}</strong>
+            </p>
+            <p className="text-xs text-blue-600">
+              💡 Drag the blue marker to adjust the exact location if needed
+            </p>
           </div>
 
           {/* Confirmation Question */}
-          <div className="border-t p-6">
+          <div className="border-t pt-6 mt-6">
             <div className="text-center space-y-4">
               <h3 className="text-lg font-semibold">Is this your home?</h3>
               <p className="text-sm text-muted-foreground">
@@ -190,12 +140,12 @@ export function MapConfirm({
                 to provide your instant estimate.
               </p>
 
-              <div className="flex justify-center gap-4">
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
                 <Button
                   variant="outline"
                   onClick={onCancel}
                   disabled={disabled}
-                  className="min-w-32"
+                  className="w-full sm:min-w-32"
                 >
                   <XCircle className="h-4 w-4 mr-2" />
                   No, Go Back
@@ -203,7 +153,7 @@ export function MapConfirm({
                 <Button
                   onClick={onConfirm}
                   disabled={disabled}
-                  className="min-w-32"
+                  className="w-full sm:min-w-32"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Yes, Analyze Roof
