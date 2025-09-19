@@ -330,26 +330,23 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
       )}
 
       {suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1">
-          <Card className="w-full max-h-60 overflow-y-auto bg-white border shadow-lg">
-            <div className="p-2">
-              {suggestions.map((suggestion) => (
-              <button
-                key={suggestion.placeId}
-                onClick={() => handleAddressSelect(suggestion)}
-                disabled={disabled || isResolving}
-                className="w-full text-left p-3 rounded-md hover:bg-muted transition-colors disabled:opacity-50"
-              >
-                <div className="font-medium text-sm">
-                  {suggestion.structuredFormatting.mainText}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {suggestion.structuredFormatting.secondaryText}
-                </div>
-              </button>
-              ))}
-            </div>
-          </Card>
+        <div className="mt-2 space-y-1">
+          <div className="text-sm font-medium text-gray-600">Suggestions:</div>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion.placeId}
+              onClick={() => handleAddressSelect(suggestion)}
+              disabled={disabled || isResolving}
+              className="w-full text-left p-3 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <div className="font-medium text-sm">
+                {suggestion.structuredFormatting.mainText}
+              </div>
+              <div className="text-sm text-gray-500">
+                {suggestion.structuredFormatting.secondaryText}
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </div>
