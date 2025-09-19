@@ -138,9 +138,9 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
             const mappedSuggestions = floridaResults.map((p: any) => ({
               placeId: p.place_id,
               description: p.description,
-              structuredFormatting: p.structured_formatting || {
-                mainText: p.description.split(',')[0] || p.description,
-                secondaryText: p.description.split(',').slice(1).join(',').trim() || 'Florida, USA'
+              structuredFormatting: {
+                mainText: p.structured_formatting?.main_text || p.description.split(',')[0] || p.description,
+                secondaryText: p.structured_formatting?.secondary_text || p.description.split(',').slice(1).join(',').trim() || 'Florida, USA'
               }
             }))
             console.log('Mapped suggestions:', mappedSuggestions)
@@ -243,11 +243,11 @@ export function AddressSearch({ onAddressSelect, disabled = false, isGoogleMapsL
         }
         
         console.log('Using mock data:', mockData) // Debug log
-        setTimeout(() => {
-          setQuery(suggestion.structuredFormatting.mainText)
-          onAddressSelect(mockData)
-          setIsResolving(false)
-        }, 1000)
+      setTimeout(() => {
+        setQuery(suggestion.structuredFormatting?.mainText || suggestion.description)
+        onAddressSelect(mockData)
+        setIsResolving(false)
+      }, 1000)
         return
       }
 
